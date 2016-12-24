@@ -1,110 +1,3 @@
-# Section 1: Data Preparation
-
-## Create model & migration script
-
-```
-php artisan make:model Post -m
-```
-
-## Setup migration script schema
-
-```php
-Schema::create('posts', function (Blueprint $table) {
-    $table->increments('id');
-    $table->string('post');
-    $table->timestamps();
-});
-```
-
-## Setup fillable
-
-```php
-protected $fillable = [
-    'post',
-];
-```
-
-## Run migration scripts
-
-```
-php artisan migrate
-```
-
-## Setup Factory
-
-```php
-$factory->define(App\Post::class, function (Faker\Generator $faker) {
-    return [
-        'post' => $faker->sentence,
-    ];
-});
-```
-
-## Setup Seeder
-
-```
-php artisan make:seeder PostTableSeeder
-```
-
-```php
-public function run()
-{
-    Post::truncate();
-    factory(App\Post::class, 100)->create();
-    $this->command->info('Post table seeded');
-}
-```
-
-## Seed the Data
-
-Call `PostTableSeeder` class in `DatabaseSeeder.php`
-
-```php
-$this->call(PostTableSeeder::class);
-```
-
-and run the following command
-
-```
-php artisan db:seed
-```
-
-OR you can call specific seeder class by passing `--class=` option.
-
-```
-php artisan db:seed --class=PostTableSeeder
-```
-
-# Section 2: How to create a page?
-
-1. Route, View(closure)
-2. Route, Controller & View (string)
-3. Route, Controller & View (blade template)
-4. Route, Controller, View (Blade), Data (Eloquent)
-
-# Form
-
-1. Action - url | route | action - [URL Helpers](https://laravel.com/docs/5.3/helpers#urls)
-2. Method - POST | GET
-3. CSRF - `csrf_field()`
-4. Method Spoofing - `method_field('METHOD_TYPE')`
-
-# How to create dummy data
-
-```
-php artisan tinker
-factory(App\User::class, 100)->create();
-```
-
-# Queries using eloquent
-
-```
-User::all();
-User::paginate();
-User::find();
-```
-
-
 # Syllabus Checklist
 
 - [ ] How to create a new Laravel project?
@@ -136,309 +29,43 @@ User::find();
 - [ ] How to register middleware?
 - [ ] How to use middleware?
 
-# How to create a page
+# Section 1: Data Preparation
 
-## Route
+1. Create model & migration script
+2. Setup Migration Script Schema
+3. Setup Fillable
+4. Run Migration Scripts
+5. Setup Factory
+6. Setup Seeder
+7. Seed the Data
+8. Seed the Data via Tinker
 
-Set Route - `routes/web.php`
+# Section 2: How to create a page?
 
-```php
-Route::get('about-us','PageController@aboutUs')
-```
+1. Route, View(closure)
+2. Route, Controller & View (string)
+3. Route, Controller & View (blade template)
+4. Route, Controller, View (Blade), Data (Eloquent)
 
-## Controller
+# Section 3: Form and Validation
 
-Create a controller - `php artisan make:controller PageController --resource` - and create a method `aboutUs` returning view from `pages.index`.
+1. Form - Create, Update & Delete
+2. Validation
+	1. Controller
+	2. Custom Request
 
-```php
-public function aboutUs()
-{
-	return view('pages.index');
-}
-```
+# Section 4: Relationship
 
-## View
+1. One-to-one
+2. One-to-many
+3. Many-to-one
+4. Many-to-many
 
-Create the view - create new folder in `resources/views/` named `pages`. In `pages`, create `aboutUs.blade.php`. Add the following content:
+# Section 5: Common Request
 
-```html
-@extends('layouts.app')
+1. Setup Multilingual
+2. Setup Custom Validation Messages
 
-@section('content')
-<div class="container">
-    <div class="row">
-		<h1>About Us</h1>
-    </div>
-</div>
-@endsection
-```
+# Section 6: Advanced Reading
 
-# How to create a list of dummy users using Artisan Tinker
-
-Run `php artisan tinker`.
-
-Then run `factory(\App\User::class, 100)->create();`. This will create 100 users.
-
-# How to create a validator
-
-Create custom request by running `php artisan make:request UserRequest`.
-
-Open `UserRequest.php` located at `app/Http/Requests`.
-
-Add validation rules for your form at `rules()` method:
-
-```php
-return [
-    'name' => 'required|min:6|max:255',
-    'email' => 'required|email|max:255|unique:users',
-    'password' => 'required|min:6|confirmed',
-];
-```
-
-Next, include `UserRequest` namespace in `UserController` - `use App\Http\Requests\UserRequest;`. 
-
-Now in `UserController`'s `store(Request $request)` method, replace `store(Request $request)` with `store(UserRequest $request)`.
-
-## To display error message
-
-Following are the sample to display an error message
-
-```html
-@if ($errors->has('email'))
-    <span class="help-block">
-        <strong>{{ $errors->first('email') }}</strong>
-    </span>
-@endif
-```
-
-## Authorization
-
-You may return to `true` in `UserRequest`'s `authorize()` method if there's no particular authorization required.
-
-```php
-public function authorize()
-{
-    return true;
-}
-```
-
-## Validation from within Controller
-
-```php
-$this->validate($request, [
-    'name' => 'required|min:6|max:255',
-    'password' => 'required|min:6|confirmed',
-]);
-```
-
-# How to create a model and migration script together?
-
-Just run following command:
-
-```php
-php artisan make:model Post -m
-```
-
-This will create a model named `Post.php` in `app` folder and a migration script `timestamp_create_posts_table.php` in `database\migrations` folder.
-
-Read more about [Creating Columns](https://laravel.com/docs/5.3/migrations#creating-columns)
-
-After done adding columns, run `php artisan migrate` to run the migration script and have your tables in database.
-
-# How to create model factory
-
-Open up `database\factories\ModelFactory.php` and copy the user's factory and update as following:
-
-```php
-$factory->define(App\Post::class, function (Faker\Generator $faker) {
-    
-    return [
-        'title' => $faker->sentence,
-        'description' => $faker->text
-    ];
-});
-```
-
-# Seeds
-
-## How to Create Seeder
-
-Create a seeder file using following command:
-
-```php
-php artisan make:seeder PostTableSeeder
-```
-
-Open `PostTableSeeder.php` located at `database\seeds` folder and call the factory for `Post`, as following in `run` method:
-
-```php
-factory(\App\Post::class, 100)->create();
-```
-
-## How to Call Another Seeder
-
-Open up `database\seeds\DatabaseSeeder.php` and call the `PostTableSeeder` as following:
-
-```php
-public function run()
-{
-    $this->call(PostSeeder::class);
-}
-```
-
-## How to Seed Data
-
-There's three ways in seeding data.
-
-Following command will seed data by calling `DatabaseSeeder.php`:
-
-```
-php artisan db:seed
-```
-
-Following command will seed data by calling seeder class name:
-
-```
-php artisan db:seed --class=PostSeeder
-```
-
-Following command will seed data after do the migration:
-
-```
-php artisan migrate --seed
-```
-
-# Relationships
-
-3 basic steps required to setup relationship between tables.
-
-## Setup Foreign Key
-
-Let say we want to have a user has many posts.
-
-Create migration script:
-
-```
-php artisan make:migration add_post_owner --table=posts
-```
-
-Open up the `timestamp_add_post_owner.php` migration script and add the following in `up` and `down` method respectively.
-
-```
-Schema::table('posts', function (Blueprint $table) {
-    $table->integer('user_id')->unsigned()->after('id');
-});
-```
-
-```
-Schema::table('posts', function (Blueprint $table) {
-    $table->dropColumn('user_id');
-});
-```
-
-Then we run `php artisan migrate`.
-
-## Update `ModelFactory.php`
-
-Update the `App\Post` model factory by adding `user_id`.
-
-```
-$factory->define(App\Post::class, function (Faker\Generator $faker) {
-    return [
-        'user_id' => $faker->randomElement(range(1, 100)),
-        'post' => $faker->paragraph,
-    ];
-});
-```
-
-## Define Relationships in Models
-
-Next we need to add relationship between related models, in this case we need `User` and `Post` model.
-
-For `User` model, a user has many posts, add the following method `app/User.php`:
-
-```php
-public function posts()
-{
-    return $this->hasMany('App\Post');
-}
-```
-
-For `Post` model, a post belongs to user, add the following method `app/Post.php`:
-
-```php
-public function user()
-{
-    return $this->belongsTo('App\User');
-}
-```
-
-Once you're done setting up the relationships, you may use the models like:
-
-```php
-$user = User::find(1);
-// just dump all the posts
-dd($user->posts);
-```
-
-```php
-$post = Post::find(1);
-// echo the owner of the post
-$post->user->name;
-```
-
-# Setup Multilingual
-
-You can setup multilingual by configure `config/app.php`'s `locale` key or you may call `App::setLocale('my')` at run time.
-
-Then make sure the language set is exist by duplicate the `resources/lang/en` to `resources/lang/xx`.
-
-## Setup Validation Messages
-
-Open up your `resources/lang/xx/validation.php` and update your key's values based on your language.
-
-# Middleware
-
-## Register Middleware
-
-Open up `app/Http/Kernel.php` and update any of the `Kernel` class properties, depends on your need.
-
-To register middleware globally, use `$middleware` property.
-
-To register middleware in group, use `$middlewareGroups` property.
-
-To register middleware for route, use `$routeMiddleware` property.
-
-## Middleware Usage
-
-There's two category, one from route and the other one from controller's constructor.
-
-### From Controller
-
-```php
-public function __construct()
-{
-    $this->middleware('auth');
-}
-```
-
-### From Route
-
-#### For Individual Route
-
-```php
-Route::get('/contact-us', 'StaticPageController@contactUs')->name('static.contactUs')->middleware('auth');
-```
-
-#### For Group Route
-
-```php
-Route::group([
-    'middleware' => ['auth'],
-    'prefix' => 'admin',
-], function () {
-    Route::resource('users', 'UserController');
-    Route::resource('posts', 'PostController');
-    Route::resource('media', 'MediumController');
-});
-```
+1. Middleware
