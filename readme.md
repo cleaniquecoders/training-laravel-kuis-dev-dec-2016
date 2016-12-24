@@ -66,6 +66,6 @@
 1. Setup Multilingual
 2. Setup Custom Validation Messages
 
-# Section 6: Advanced Reading
+# Section 6: Advanced Request
 
 1. Middleware
